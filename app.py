@@ -2,10 +2,8 @@ from flask import Flask, request, jsonify, render_template
 import pandas as pd
 import json
 from scraper import fetch_html_selenium, html_to_markdown_with_readability, create_dynamic_listing_model, create_listings_container_model, format_data
-from flask_frozen import Freezer
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-freezer = Freezer(app)
 
 @app.route('/')
 def index():
@@ -40,4 +38,4 @@ def scrape():
     })
 
 if __name__ == '__main__':
-    freezer.freeze()
+    app.run()
