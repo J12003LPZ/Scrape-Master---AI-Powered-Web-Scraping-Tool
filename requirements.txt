@@ -10,7 +10,6 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 Flask==3.0.3
-Frozen-Flask==1.0.2
 google-ai-generativelanguage==0.6.6
 google-api-core==2.19.2
 google-api-python-client==2.144.0
