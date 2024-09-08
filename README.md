@@ -2,6 +2,10 @@
 
 Scrape Master is an AI-powered web scraping tool designed to extract key information like names, prices, and image URLs from websites. This tool simplifies the process of data extraction by leveraging intelligent algorithms that handle the complexities of various website structures. However, due to the diversity of web technologies and anti-scraping mechanisms, not all websites are scrappable.
 
+## Demo Video
+
+Watch the demo of Scrape Master [here](https://res.cloudinary.com/dakw2jqjp/video/upload/v1725812150/video/Scrape-Master-AI-Powered-Web-Scraping-Tool/Screen_Recording_2024-09-08_112357_fawh48.mp4).
+
 ## Features
 
 - **Name Extraction**: Automatically detect and scrape names from web pages, perfect for product listings, directories, or articles.
