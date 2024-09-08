@@ -4,7 +4,7 @@ Scrape Master is an AI-powered web scraping tool designed to extract key informa
 
 ## Demo Video
 
-Watch the demo of Scrape Master [here]([https://res.cloudinary.com/dakw2jqjp/video/upload/v1725812150/video/Scrape-Master-AI-Powered-Web-Scraping-Tool/Screen_Recording_2024-09-08_112357_fawh48.mp4](https://res.cloudinary.com/dakw2jqjp/video/upload/v1725817990/video/Scrape-Master-AI-Powered-Web-Scraping-Tool/Screen_Recording_2024-09-08_112357_zmygqo.mp4).
+Watch the demo of Scrape Master [here](https://res.cloudinary.com/dakw2jqjp/video/upload/v1725817990/video/Scrape-Master-AI-Powered-Web-Scraping-Tool/Screen_Recording_2024-09-08_112357_zmygqo.mp4).
 
 ## Features
 
