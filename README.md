@@ -24,7 +24,7 @@ Watch the demo of Scrape Master [here](https://res.cloudinary.com/dakw2jqjp/vide
 To install and use Scrape Master, clone the repository and install the required dependencies:
 
 ```bash
-git clone [https://github.com/your-username/scrape-master.git](https://github.com/J12003LPZ/Scrape-Master-AI-Powered-Web-Scraping-Tool.git)
+git clone [https://github.com/J12003LPZ/Scrape-Master-AI-Powered-Web-Scraping-Tool.git]
 cd scrape-master
 pip install -r requirements.txt
 python app.py
