@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.png') }}" type="image/png">
+    <title>Universal Web Scraper</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        background-color: #1e1e2e;
+        color: #ffffff;
+        height: 100vh;
+      }
+      .sidebar {
+        width: 40%;
+        min-width: 400px;
+        padding: 40px;
+        background-color: #181825;
+        overflow-y: auto;
+      }
+      .main-content {
+        flex-grow: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+      }
+      h1,
+      h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+      }
+      select,
+      input,
+      button {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #2a2a3c;
+        border: none;
+        color: #ffffff;
+        font-size: 16px;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tag {
+        background-color: #3a3a4e;
+        padding: 10px 15px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+      }
+      .tag-close {
+        margin-left: 10px;
+        cursor: pointer;
+        color: #ff5555;
+        font-size: 20px;
+      }
+      #scrapeButton {
+        background-color: #ff5555;
+        color: white;
+        border: none;
+        padding: 15px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background-color 0.3s;
+      }
+      #scrapeButton:hover {
+        background-color: #ff3333;
+      }
+      #resultsTable {
+        width: 100%;
+        margin: 20px 0;
+        border-collapse: collapse;
+        max-height: 500px;
+        overflow-y: auto;
+        display: none;
+      }
+      #resultsTable th,
+      #resultsTable td {
+        border: 1px solid #ffffff;
+        padding: 10px;
+        text-align: left;
+      }
+      #resultsTable th {
+        position: sticky;
+        top: 0;
+        background-color: #2a2a3c;
+        z-index: 1;
+      }
+      .download-btns {
+        display: none;
+        gap: 15px;
+      }
+      .download-btns button {
+        padding: 10px;
+        background-color: #2a2a3c;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .loading {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        font-size: 24px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ffffff;
+        border-top: 4px solid #ff5555;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>Web Scraper Settings</h2>
+      <label for="model">Select Model</label>
+      <select id="model">
+        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+      </select>
+      <label for="url">Enter URL</label>
+      <input type="text" id="url" value="" placeholder="https://example.com" />
+      <label for="fields">Enter Fields to Extract:</label>
+      <input type="text" id="fields" placeholder="Press enter to add a tag" />
+      <div id="tagContainer" class="tag-container"></div>
+      <button id="scrapeButton">Scrape</button>
+    </div>
+
+    <div class="main-content">
+      <h1>Universal Web Scraper 🐙</h1>
+
+      <!-- Loading Spinner -->
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Please wait... Data is being scraped.</p>
+      </div>
+
+      <table id="resultsTable">
+        <thead>
+          <tr id="tableHeaders"></tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+
+      <div class="download-btns">
+        <button id="downloadJson">Download JSON</button>
+        <button id="downloadCsv">Download CSV</button>
+        <button id="downloadMarkdown">Download Markdown</button>
+      </div>
+    </div>
+
+    <script>
+      const fieldsInput = document.getElementById("fields");
+      const tagContainer = document.getElementById("tagContainer");
+      const scrapeButton = document.getElementById("scrapeButton");
+      const resultsBody = document.getElementById("resultsBody");
+      const tableHeaders = document.getElementById("tableHeaders");
+      const loadingSpinner = document.querySelector(".loading");
+      const resultsTable = document.getElementById("resultsTable");
+      const downloadButtons = document.querySelector(".download-btns");
+
+      let scrapedData = [];
+
+      loadingSpinner.style.display = "none";
+
+      fieldsInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && this.value) {
+          addTag(this.value);
+          this.value = "";
+        }
+      });
+
+      function addTag(text) {
+        const tag = document.createElement("div");
+        tag.classList.add("tag");
+        tag.innerHTML = `${text} <span class="tag-close">×</span>`;
+        tag.querySelector(".tag-close").addEventListener("click", function () {
+          tag.remove();
+        });
+        tagContainer.appendChild(tag);
+      }
+
+      scrapeButton.addEventListener("click", async function () {
+        const url = document.getElementById("url").value;
+        const tags = Array.from(tagContainer.children).map((tag) =>
+          tag.textContent.trim().slice(0, -1)
+        );
+
+        // Show spinner and hide results initially
+        loadingSpinner.style.display = "flex";
+        resultsTable.style.display = "none";
+        downloadButtons.style.display = "none";
+
+        const response = await fetch("/scrape", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url, keywords: tags }),
+        });
+
+        const data = await response.json();
+        scrapedData = data.result;
+
+        // Hide spinner, show table and download buttons
+        loadingSpinner.style.display = "none";
+        resultsTable.style.display = "table";
+        downloadButtons.style.display = "flex";
+
+        displayResults(scrapedData, tags);
+      });
+
+      function displayResults(data, headers) {
+        resultsBody.innerHTML = "";
+        tableHeaders.innerHTML = "";
+
+        headers.forEach((header) => {
+          const th = document.createElement("th");
+          th.textContent = header;
+          tableHeaders.appendChild(th);
+        });
+
+        data.forEach((item) => {
+          const row = document.createElement("tr");
+          headers.forEach((header) => {
+            const cell = document.createElement("td");
+            cell.textContent = item[header] || "N/A";
+            row.appendChild(cell);
+          });
+          resultsBody.appendChild(row);
+        });
+      }
+
+      document
+        .getElementById("downloadJson")
+        .addEventListener("click", () => downloadFile("json"));
+      document
+        .getElementById("downloadCsv")
+        .addEventListener("click", () => downloadFile("csv"));
+      document
+        .getElementById("downloadMarkdown")
+        .addEventListener("click", () => downloadFile("md"));
+
+      function downloadFile(type) {
+        const a = document.createElement("a");
+        let fileContent;
+
+        if (type === "json") {
+          fileContent = new Blob([JSON.stringify(scrapedData)], {
+            type: "application/json",
+          });
+          a.download = "scraped_data.json";
+        } else if (type === "csv") {
+          const csvData = scrapedData
+            .map((row) => Object.values(row).join(","))
+            .join("\n");
+          fileContent = new Blob([csvData], { type: "text/csv" });
+          a.download = "scraped_data.csv";
+        } else if (type === "md") {
+          const mdData = scrapedData
+            .map((row) => `| ${Object.values(row).join(" | ")} |`)
+            .join("\n");
+          fileContent = new Blob([mdData], { type: "text/markdown" });
+          a.download = "scraped_data.md";
+        }
+
+        a.href = URL.createObjectURL(fileContent);
+        a.click();
+      }
+    </script>
+  </body>
+</html>
